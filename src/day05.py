@@ -10,6 +10,10 @@ import argparse
 import numpy as np
 import inspect
 
+from collections import namedtuple
+
+Rule = namedtuple('Rule', ['src', 'tgt', 'tgt_start', 'src_start', 'rng_len'])
+
 def read_input(lines, seeds, part, verbose = False):
 
     if seeds:
@@ -32,18 +36,18 @@ def read_input(lines, seeds, part, verbose = False):
     # Parse maps
     if verbose: print(f'\nMaps:')
     matches = list(re.finditer(r'(\w*)-to-(\w*) map:([\d\s\n]*)', lines, re.DOTALL))
-    rules = [parse_map(match, verbose) for match in matches]
+    rules = [parse_rule(match, verbose) for match in matches]
 
     # Just check that the rules are in the right order
     tgt = 'seed'
     for rule in rules:
-        assert tgt == rule[0], f'Current target {tgt} != map source {rule[0]}'
-        tgt = rule[1]
+        assert tgt == rule.src, f'Current target {tgt} != map source {rule.src}'
+        tgt = rule.tgt
     assert tgt == 'location'
 
     return seeds, rules
 
-def parse_map(match, verbose=False):
+def parse_rule(match, verbose=False):
     
     src = match.group(1)
     tgt = match.group(2)
@@ -59,12 +63,12 @@ def parse_map(match, verbose=False):
         for s, t, r in zip(src_start, tgt_start, rng_len):
             print(f'\t{t} {s} {r}')
 
-    return (src, tgt, tgt_start, src_start, rng_len)
+    return Rule(src, tgt, tgt_start, src_start, rng_len)
 
-def reverse(map):
+def reverse(rule):
     
-        src, tgt, tgt_start, src_start, rng_len = map
-        return (tgt, src, src_start, tgt_start, rng_len)
+        src, tgt, tgt_start, src_start, rng_len = rule
+        return Rule(tgt, src, src_start, tgt_start, rng_len)
 
 # Break down interval into tuples that do not contain any breaks, except:
 #   (possibly) at the start, if are_starts
@@ -99,38 +103,34 @@ def intersect(interval, breaks, are_starts):
 
     return broken
 
-def map_numbers(map, numbers, verbose=False):
+def map_numbers(rule, numbers, verbose=False):
 
     if isinstance(numbers, list): 
-        mapped = [ map_numbers(map, x, verbose) for x in numbers ]
+        mapped = [ map_numbers(rule, x, verbose) for x in numbers ]
         return mapped
     
-    src, tgt, tgt_start, src_start, rng_len = map
-
     numbers = np.array(numbers)
     mapped = np.array(numbers)
 
-    for s, t, rng in zip(src_start, tgt_start, rng_len):
+    for s, t, rng in zip(rule.src_start, rule.tgt_start, rule.rng_len):
         d = numbers - s
         in_range = (d >= 0) & (d < rng)
         if any(in_range):
             mapped[in_range] = t + d[in_range]
 
     if verbose:
-        print(f'{src}: {numbers} >> {tgt}: {mapped}')
+        print(f'{rule.src}: {numbers} >> {rule.tgt}: {mapped}')
     
     return mapped
 
-def map_intervals(map, interval, verbose=False):
+def map_intervals(rule, interval, verbose=False):
 
-    src, tgt, tgt_start, src_start, rng_len = map
-
-    mapped = intersect(interval, src_start, True)
-    mapped = intersect(mapped, src_start + rng_len - 1, False)
-    mapped = [ tuple(map_numbers(map, r, verbose)) for r in mapped ]
+    mapped = intersect(interval, rule.src_start, True)
+    mapped = intersect(mapped, rule.src_start + rule.rng_len - 1, False)
+    mapped = [ tuple(map_numbers(rule, r, verbose)) for r in mapped ]
 
     if verbose:
-       print(f'{src}-{tgt}: {interval} >> {mapped}\n')
+       print(f'{rule.src}-{rule.tgt}: {interval} >> {mapped}\n')
 
     return mapped
 
