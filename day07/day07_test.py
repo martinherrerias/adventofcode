@@ -5,6 +5,11 @@ from argparse import Namespace
 
 from day07 import *
 
+import os
+here = os.path.dirname(os.path.realpath(__file__))
+test_data = os.path.join(here, 'day07.test.dat')
+full_data = os.path.join(here, 'day07.dat')
+
 class TestDay07(unittest.TestCase):
 
     def test_parse_input(self):
@@ -35,14 +40,14 @@ class TestDay07(unittest.TestCase):
         self.assertEqual(list(r), [0,2,1])
 
     def test_part_1(self):
-        args = Namespace(file = 'test_data/day07.txt', part = 1, verbose = False)
+        args = Namespace(file = test_data, part = 1, verbose = False)
         self.assertEqual(main(args), 6440)
 
     def test_part_2(self):
-        args = Namespace(file = 'test_data/day07.txt', part = 2, verbose = False)
+        args = Namespace(file = test_data, part = 2, verbose = False)
         self.assertEqual(main(args), 5905)
 
-        args = Namespace(file = 'data/day07.txt', part = 2, verbose = False)
+        args = Namespace(file = full_data, part = 2, verbose = False)
         self.assertEqual(main(args), 251515496)
 
 if __name__ == '__main__':

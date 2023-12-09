@@ -5,6 +5,11 @@ from argparse import Namespace
 
 from day06 import *
 
+import os
+here = os.path.dirname(os.path.realpath(__file__))
+test_data = os.path.join(here, 'day06.test.dat')
+full_data = os.path.join(here, 'day06.dat')
+
 class TestDay06(unittest.TestCase):
 
     def test_race(self):
@@ -14,20 +19,20 @@ class TestDay06(unittest.TestCase):
         self.assertEqual(race(10, 25, True), 0)
 
     def test_part_1(self):
-        args = Namespace(file = 'test_data/day06.txt', part = 1, verbose = False)
+        args = Namespace(file = test_data, part = 1, verbose = False)
         best = main(args)
         self.assertEqual(best, 288)
 
-        args = Namespace(file = 'data/day06.txt', part = 1, verbose = False)
+        args = Namespace(file = full_data, part = 1, verbose = False)
         best = main(args)
         self.assertEqual(best, 114400)
 
     def test_part_2(self):
-        args = Namespace(file = 'test_data/day06.txt', part = 2, verbose = False)
+        args = Namespace(file = test_data, part = 2, verbose = False)
         best = main(args)
         self.assertEqual(best, 71503)
 
-        args = Namespace(file = 'data/day06.txt', part = 2, verbose = False)
+        args = Namespace(file = full_data, part = 2, verbose = False)
         best = main(args)
         self.assertEqual(best, 21039729)
 

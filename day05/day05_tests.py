@@ -6,6 +6,11 @@ from argparse import Namespace
 
 from day05 import *
 
+import os
+here = os.path.dirname(os.path.realpath(__file__))
+test_data = os.path.join(here, 'day05.test.dat')
+full_data = os.path.join(here, 'day05.dat')
+
 class TestDay05(unittest.TestCase):
 
     def test_intersect(self):
@@ -65,12 +70,12 @@ class TestDay05(unittest.TestCase):
         # print(map_intervals(map, interval))
 
     def test_part_1(self):
-        args = Namespace(verbose=False, part=1, file='test_data/day05.txt', seeds=None)
+        args = Namespace(verbose=False, part=1, file=test_data, seeds=None)
         best = main(args)
         self.assertEqual(best, 35)
 
     def test_part_2(self):
-        args = Namespace(verbose=False, part=2, file='test_data/day05.txt', seeds=None)
+        args = Namespace(verbose=False, part=2, file=test_data, seeds=None)
         best = main(args)
         self.assertEqual(best, 46)
 

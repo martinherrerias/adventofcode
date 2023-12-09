@@ -8,12 +8,11 @@ Advent of Code 2023 - Template
 import sys
 import argparse
 import inspect
+import re
 
-def do_stuff(line, part = 2, verbose = False):
-    value = part
-    if verbose:
-        print(f'{line} >> {value}')
-    return value
+def parse_line(line, part = 2, verbose = False):
+    numbers = map(int, re.findall(r'(\d+)', line))
+    return sum(numbers)*part
 
 def parse_args():
     parser = argparse.ArgumentParser(usage= '''Usage:
@@ -32,14 +31,8 @@ def main(args):
     else:
         lines = sys.stdin.readlines()
 
-    total = 0
-    for line in lines:
-        line = line.strip()
-        if not line:
-            continue
-
-        value = do_stuff(line, args.part, args.verbose)
-        total += value
+    values = [parse_line(line, args.part, args.verbose) for line in lines]
+    total = sum(values)
 
     frame = inspect.currentframe().f_back
     if frame.f_code.co_nlocals > 0:
