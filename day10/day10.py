@@ -28,10 +28,6 @@ def get_tile(key):
 
 def connections(tiles, i, j):
 
-    assert isinstance(tiles, list)
-    assert isinstance(tiles[i], list)
-    assert isinstance(tiles[i][j], Tile)
-
     t = tiles[i][j]
     if i > 0 and t.N and tiles[i-1][j].S:
         yield (i-1, j)
@@ -42,45 +38,39 @@ def connections(tiles, i, j):
     if j < len(tiles[0])-1 and t.E and tiles[i][j+1].W:
         yield (i, j+1)
 
+def get_path(tiles):
+
+    start = next((i, j) for i, row in enumerate(tiles) for j, tile in enumerate(row) if tile.key == 'S')
+    path = [start]
+
+    c = list(connections(tiles, *start))
+    assert len(c) == 2
+
+    tile = c[0]
+    while tile != start:
+
+        path.append(tile)
+
+        c = list(connections(tiles, *tile))
+        assert len(c) == 2
+
+        if c[0] == path[-2]:
+            tile = c[1]
+        else:
+            tile = c[0]
+        
+    return path
+
 def get_distances(tiles, verbose=False):
 
-    assert isinstance(tiles, list)
-    assert isinstance(tiles[0], list)
-    assert isinstance(tiles[0][0], Tile)
+    path = get_path(tiles)
 
     D = np.zeros((len(tiles), len(tiles[0])), dtype=int)
     D.fill(-1)
-    open_ends = np.zeros((len(tiles), len(tiles[0])), dtype=bool)
 
-    start = next((i, j) for i, row in enumerate(tiles) for j, tile in enumerate(row) if tile.key == 'S')
-    D[start] = 0
-    open_ends[start] = True
-
-    if verbose:
-        print(f'Starting at {start}')
-
-    for iter in range(len(tiles) * len(tiles[0])):
-        if not np.any(open_ends):
-            break
-        if verbose:
-            print(f'Iteration {iter}')
-        
-        for i, j in zip(*np.where(open_ends)):
-            d = D[i,j]
-            c = list(connections(tiles, i, j))
-            if verbose:
-                print(f'Found {len(c)} connections for {tiles[i][j].key}@({i},{j}): {c}')
-
-            for ci, cj in c:
-                if D[ci,cj] == -1 or D[ci,cj] > d + 1:
-
-                    D[ci,cj] = d + 1
-                    open_ends[ci,cj] = True
-
-                    if verbose:
-                        print(f'Flagged {tiles[ci][cj].key}@({ci},{cj}) as open, with dist {d+1}')
-                else:
-                    open_ends[ci,cj] = False
+    for idx, (i, j) in enumerate(path):
+        d = min(idx, len(path)-idx)
+        D[i,j] = d
     
     return D
 

@@ -35,6 +35,12 @@ class TestDay10(unittest.TestCase):
         self.assertEqual(list(connections(tiles, 2, 1)), [(2,0), (2,2)])
         self.assertEqual(list(connections(tiles, 2, 2)), [(1,2), (2,1)])
 
+    def test_get_path(self):
+        with open(test_data['a']) as f:
+            tiles = [[get_tile(c) for c in line.strip()] for line in f.readlines()]
+        path = get_path(tiles)
+        self.assertEqual(path, [(0,0), (1,0), (2,0), (2,1), (2,2), (1,2), (0,2), (0,1)])
+
     def test_get_distances(self):
         with open(test_data['a']) as f:
             tiles = [[get_tile(c) for c in line.strip()] for line in f.readlines()]
