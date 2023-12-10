@@ -14,6 +14,7 @@ here = os.path.dirname(os.path.realpath(__file__))
 test_data = glob.glob(os.path.join(here, '*.test.dat'))
 keys = [re.match(r'.*(\w).test.dat', f).group(1) for f in test_data]
 test_data = dict(zip(keys, test_data))
+full_data = os.path.join(here, 'day10.dat')
 
 class TestDay10(unittest.TestCase):
 
@@ -67,6 +68,10 @@ class TestDay10(unittest.TestCase):
         for k, ans in answ.items():
             args = Namespace(file = test_data[k], part = 1, verbose = False)
             self.assertEqual(main(args), ans)
+
+    def test_part_1_full(self):
+        args = Namespace(file = full_data, part = 1, verbose = False)
+        self.assertEqual(main(args), 7097)
 
     @unittest.skip('not implemented')
     def test_part_2(self):

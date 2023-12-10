@@ -50,36 +50,38 @@ def get_distances(tiles, verbose=False):
 
     D = np.zeros((len(tiles), len(tiles[0])), dtype=int)
     D.fill(-1)
+    open_ends = np.zeros((len(tiles), len(tiles[0])), dtype=bool)
 
-    def propagate(i, j, dist = 0):
-
-        assert isinstance(i, int)
-        assert isinstance(j, int)
-
-        nonlocal D
-        nonlocal tiles
-
-        c = list(connections(tiles, i, j))
-        if verbose:
-            print(f'Found {len(c)} connections for {tiles[i][j].key}@({i},{j}): {c}')
-
-        for ci, cj in c:
-            if D[ci,cj] == -1 or D[ci,cj] > dist + 1:
-
-                D[ci,cj] = dist + 1
-                propagate(ci, cj, dist + 1)
-
-                if verbose:
-                    print(f'Going into {tiles[ci][cj].key}@({ci},{cj}) with dist {dist+1}')
-        
     start = next((i, j) for i, row in enumerate(tiles) for j, tile in enumerate(row) if tile.key == 'S')
     D[start] = 0
+    open_ends[start] = True
 
     if verbose:
         print(f'Starting at {start}')
 
-    propagate(*start)
+    for iter in range(len(tiles) * len(tiles[0])):
+        if not np.any(open_ends):
+            break
+        if verbose:
+            print(f'Iteration {iter}')
+        
+        for i, j in zip(*np.where(open_ends)):
+            d = D[i,j]
+            c = list(connections(tiles, i, j))
+            if verbose:
+                print(f'Found {len(c)} connections for {tiles[i][j].key}@({i},{j}): {c}')
 
+            for ci, cj in c:
+                if D[ci,cj] == -1 or D[ci,cj] > d + 1:
+
+                    D[ci,cj] = d + 1
+                    open_ends[ci,cj] = True
+
+                    if verbose:
+                        print(f'Flagged {tiles[ci][cj].key}@({ci},{cj}) as open, with dist {d+1}')
+                else:
+                    open_ends[ci,cj] = False
+    
     return D
 
 def parse_args():
