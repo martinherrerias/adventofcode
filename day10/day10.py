@@ -2,14 +2,13 @@
 
 '''
 Advent of Code 2023 - Day10
-
 '''
 
 import sys
 import argparse
 import inspect
-import re
 import numpy as np
+import matplotlib.path as mplpath
 
 from collections import namedtuple
 
@@ -74,6 +73,16 @@ def get_distances(tiles, verbose=False):
     
     return D
 
+def points_in_loop(path, N, M):
+    
+    poly_path = mplpath.Path(np.array(path))
+
+    for i in range(N):
+        for j in range(M):
+            point = (i, j)
+            if not (point in path) and poly_path.contains_point(point):
+                yield point
+
 def parse_args():
     parser = argparse.ArgumentParser(usage= '''Usage:
         cat data.txt | day10.py [-v] [--part 1]
@@ -93,9 +102,14 @@ def main(args):
 
     tiles = [[get_tile(c) for c in line.strip()] for line in lines]
 
-    D = get_distances(tiles, args.verbose)
-
-    total = np.max(D)
+    if args.part == 1:
+        D = get_distances(tiles, args.verbose)
+        total = np.max(D)
+    else:
+        N, M = len(tiles), len(tiles[0])
+        path = get_path(tiles)
+        points = list(points_in_loop(path, N, M))
+        total = len(points)
 
     frame = inspect.currentframe().f_back
     if frame.f_code.co_nlocals > 0:

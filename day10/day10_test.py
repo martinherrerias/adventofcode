@@ -68,6 +68,12 @@ class TestDay10(unittest.TestCase):
             [ 0, 1,-1, 7, 8],
             [ 1, 4, 5, 6, 7],
             [ 2, 3,-1,-1,-1]])
+        
+    def test_points_in_loop(self):
+        N, M = 3, 3
+        path = [(0,0), (1,0), (2,0), (2,1), (2,2), (1,2), (0,2), (0,1)]
+        points = list(points_in_loop(path, N, M))
+        self.assertEqual(points, [(1,1)])
 
     def test_part_1(self):
         answ = {'a': 4, 'b': 4, 'c': 8, 'd': 8}
@@ -79,10 +85,10 @@ class TestDay10(unittest.TestCase):
         args = Namespace(file = full_data, part = 1, verbose = False)
         self.assertEqual(main(args), 7097)
 
-    @unittest.skip('not implemented')
     def test_part_2(self):
+        answ = {'a': 1, 'b': 1, 'c': 1, 'd': 1, 'e': 4, 'f': 8}
         args = Namespace(file = test_data['a'], part = 2, verbose = False)
-        self.assertEqual(main(args), 360)
+        self.assertEqual(main(args), 1)
 
 if __name__ == '__main__':
     unittest.main()
