@@ -13,15 +13,22 @@ import numpy as np
 
 def parse_line(line, part = 2, verbose = False):
     numbers = np.array(list(map(int, re.findall(r'([-\d]+)', line))))
-    next = predict(numbers, verbose)
+    next = predict(numbers, part, verbose)
     return next
         
-def predict(numbers, verbose):
+def predict(numbers, part, verbose):
     d = np.diff(numbers)
-    if all(d == d[0]):
-        next = numbers[-1] + d[0]
+    if part == 1:
+        idx = -1
+        sign = 1
     else:
-        next = numbers[-1] + predict(d, verbose)
+        idx = 0
+        sign = -1
+
+    if all(d == d[0]):
+        next = numbers[idx] + sign*d[0]
+    else:
+        next = numbers[idx] + sign*predict(d, part, verbose)
     if verbose:
         print(f'{numbers} >> {next}')
     return next
