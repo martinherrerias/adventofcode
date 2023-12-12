@@ -13,19 +13,37 @@ import re
 import itertools
 
 def check_line(line, groups):
+    pattern = match_pattern(groups)
+    return pattern.match(line) is not None
+
+def match_pattern(groups):
     pattern = '[^#]*'
     for g in groups:
         pattern += (f'(#{{{g}}})(?!#).*')
-    return re.match(pattern, line) is not None
+    return re.compile(pattern)
 
-def parse_line(line, part = 2, verbose = False):
+def parse_line(line, part, verbose = False):
 
     groups = list(map(int, re.findall(r'(\d+)', line)))
     record = np.array(list(re.match(r'[?.#]+', line).group(0)))
 
+    if part == 2:
+        groups = groups*5
+        record = np.concatenate([record]*5)
+
+    pattern = match_pattern(groups)
+
     unknown = np.where(record == '?')[0]
     damaged = np.where(record == '#')[0]
     missing = sum(groups) - len(damaged)
+    # missing_damaged = sum(groups) - len(damaged)
+    # missing_operating = len(unknown) - missing_damaged
+    # if missing_damaged < missing_operating:
+    #     missing = missing_damaged
+    #     stuff = '#'
+    # else:
+    #     missing = missing_operating
+    #     stuff = '.'
 
     if verbose:
         print(f'{line}: {missing} missing #')
@@ -35,16 +53,15 @@ def parse_line(line, part = 2, verbose = False):
         nopts = 1
     else:
         nopts = 0
-        working = []
         for idx in itertools.combinations(unknown, missing):
             test[unknown] = '.'
             test[np.array(idx)] = '#'
             modline = ''.join(test)
-            if check_line(modline, groups):
+            if pattern.match(modline) is not None:
                 nopts += 1
-                working.append(modline)
                 if verbose:
                     print(''.join(test) + ' works')
+
     return nopts
 
 def parse_args():
