@@ -11,56 +11,79 @@ import inspect
 import numpy as np
 import re
 import itertools
+from math import comb
 
 def check_line(line, groups):
     pattern = match_pattern(groups)
     return pattern.match(line) is not None
 
-def match_pattern(groups):
-    pattern = '[^#]*'
-    for g in groups:
-        pattern += (f'(#{{{g}}})(?!#).*')
+def match_pattern(groups, flexible = True):
+    if flexible:
+        pattern = '[^#]*'
+        for g in groups:
+            pattern += f'(?<!#)([#?]{{{g}}})(?!#)[^#]*'
+    else:
+        pattern = [f'(#{{{g}}})' for g in groups]
+        pattern = '\.*' + ('\.+'.join(pattern)) + '\.*'
+
     return re.compile(pattern)
 
 def parse_line(line, part, verbose = False):
 
     groups = list(map(int, re.findall(r'(\d+)', line)))
-    record = np.array(list(re.match(r'[?.#]+', line).group(0)))
+    record = re.match(r'^[?.#]+', line).group(0)
 
     if part == 2:
         groups = groups*5
-        record = np.concatenate([record]*5)
+        record = '?'.join([record]*5)
 
+    record = np.array(list(record))
     pattern = match_pattern(groups)
 
     unknown = np.where(record == '?')[0]
     damaged = np.where(record == '#')[0]
     missing = sum(groups) - len(damaged)
-    # missing_damaged = sum(groups) - len(damaged)
-    # missing_operating = len(unknown) - missing_damaged
-    # if missing_damaged < missing_operating:
-    #     missing = missing_damaged
-    #     stuff = '#'
-    # else:
-    #     missing = missing_operating
-    #     stuff = '.'
 
     if verbose:
-        print(f'{line}: {missing} missing #')
+        print(f'\n{line}: {missing} missing # in {len(unknown)} gaps ({comb(len(unknown), missing)} combinations)')
 
-    test = record.copy()
-    if missing == 0:
-        nopts = 1
-    else:
-        nopts = 0
-        for idx in itertools.combinations(unknown, missing):
-            test[unknown] = '.'
-            test[np.array(idx)] = '#'
-            modline = ''.join(test)
-            if pattern.match(modline) is not None:
-                nopts += 1
-                if verbose:
-                    print(''.join(test) + ' works')
+    def check_invalid(stuff):
+
+        nonlocal record
+        nonlocal unknown
+
+        invalid = np.zeros(len(record), dtype=bool)
+        for i in unknown:
+            test = record.copy()
+            test[i] = stuff
+            invalid[i] = pattern.match(''.join(test)) is None
+
+        if np.any(invalid):
+            not_stuff = '.' if stuff == '#' else '#'
+            record[invalid] = not_stuff
+            unknown = np.where(record == '?')[0]
+
+        return invalid
+    
+    invalid = True
+    while np.any(invalid):
+        invalid = check_invalid('#')
+        invalid = check_invalid('.')
+
+    damaged = np.where(record == '#')[0]
+    missing = sum(groups) - len(damaged)
+    
+    if verbose:
+        print('(valid) ' + ''.join(record) + f': {missing} missing # in {len(unknown)} gaps ({comb(len(unknown), missing)} combinations)')
+
+    pattern = match_pattern(groups, flexible = False)
+    nopts = 0
+    for idx in itertools.combinations(unknown, missing):
+        test = record.copy()
+        test[unknown] = '.'
+        test[np.array(idx, dtype=int)] = '#'
+        if pattern.match(''.join(test)) is not None:
+            nopts += 1
 
     return nopts
 
