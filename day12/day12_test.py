@@ -20,10 +20,24 @@ class TestDay12(unittest.TestCase):
         self.assertEqual(parse_line('.??..??...?##. 1,1,3', 1), 4)
         self.assertEqual(parse_line('?###???????? 3,2,1', 1), 10)
 
-    def test_parse_line_2(self):
-        self.assertEqual(parse_line('???.### 1,1,3', 2, True), 1)
-        self.assertEqual(parse_line('.??..??...?##. 1,1,3', 2, True), 16384)
-        # self.assertEqual(parse_line('?###???????? 3,2,1', 1), 506250)
+
+    def test_parse_line_2_1(self):
+        self.assertEqual(parse_line('???.### 1,1,3', 2), 1)
+
+    def test_parse_line_2_2(self):
+        self.assertEqual(parse_line('.??..??...?##. 1,1,3', 2), 16384)
+
+    def test_parse_line_2_4(self):
+        self.assertEqual(parse_line('?#?#?#?#?#?#?#? 1,3,1,6', 2), 1)
+
+    def test_parse_line_2_5(self):
+        self.assertEqual(parse_line('????.#...#... 4,1,1', 2), 16)
+
+    def test_parse_line_2_6(self):
+        self.assertEqual(parse_line('????.######..#####. 1,6,5', 2), 2500)
+
+    def test_parse_line_2_7(self):
+        self.assertEqual(parse_line('?###???????? 3,2,1', 2, True, True), 506250)
 
     @unittest.skip("Skipping part 2")
     def test_part_1(self):
