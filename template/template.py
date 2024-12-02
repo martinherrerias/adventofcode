@@ -1,26 +1,28 @@
 #! /usr/bin/env python3
 
 '''
-Advent of Code 2023 - Template
-
+Advent of Code 2024 - https://adventofcode.com/2024/
 '''
 
 import sys
 import argparse
 import inspect
 import re
+from pathlib import Path
 
 def parse_line(line, part = 2, verbose = False):
     numbers = map(int, re.findall(r'(\d+)', line))
     return sum(numbers)*part
 
-def parse_args():
-    parser = argparse.ArgumentParser(usage= '''Usage:
-        cat data.txt | template.py [-v] [--part 1]
-        python3 -m template.py --file data.txt [-v] [--part 1]''')
+def parse_args():    
+    parser = argparse.ArgumentParser(
+        usage=f'python3 {Path(__file__).name} [--file DATA] [--part N] [-v]'
+              f'cat DATA | {Path(__file__).name} [--part 1] [-v]'
+    )
+    parser.add_argument('--file', type=str, default=Path(__file__).with_suffix('.dat').name, 
+        help='Specify input file, default: %(default)s')
+    parser.add_argument('--part', type=int, default=1, help='Part number, default: %(default)s')
     parser.add_argument('-v', '--verbose', action='store_true', help='Enable verbose output')
-    parser.add_argument('--part', type=int, default=2, help='Specify the part number')
-    parser.add_argument('--file', type=str, help='Specify input file')
     return parser.parse_args()
 
 def main(args):
