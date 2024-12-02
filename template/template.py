@@ -7,12 +7,8 @@ Advent of Code 2024 - https://adventofcode.com/2024/
 import sys
 import argparse
 import inspect
-import re
+import numpy as np
 from pathlib import Path
-
-def parse_line(line, part = 2, verbose = False):
-    numbers = map(int, re.findall(r'(\d+)', line))
-    return sum(numbers)*part
 
 def parse_args():    
     parser = argparse.ArgumentParser(
@@ -25,6 +21,12 @@ def parse_args():
     parser.add_argument('-v', '--verbose', action='store_true', help='Enable verbose output')
     return parser.parse_args()
 
+def part1(row):
+    return sum(row)
+
+def part2(row):
+    return sum(row)
+
 def main(args):
 
     if args.file:
@@ -33,8 +35,20 @@ def main(args):
     else:
         lines = sys.stdin.readlines()
 
-    values = [parse_line(line, args.part, args.verbose) for line in lines]
+    rows = [np.fromstring(line, dtype=int, sep=' ') for line in lines]
+
+    if args.part == 1:
+        values = [part1(row) for row in rows]
+    elif args.part == 2:
+        values = [part2(row) for row in rows]
+    else:
+        raise ValueError(f'Invalid part number: {args.part}')
+    
     total = sum(values)
+
+    if args.verbose:
+        for i, value in enumerate(values):
+            print(f'{rows[i]}: {value}')
 
     frame = inspect.currentframe().f_back
     if frame.f_code.co_nlocals > 0:
