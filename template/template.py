@@ -7,10 +7,11 @@ Advent of Code 2024 - https://adventofcode.com/2024/
 import sys
 import argparse
 import inspect
-import numpy as np
 from pathlib import Path
 
-def parse_args():    
+import numpy as np
+
+def parse_args():
     parser = argparse.ArgumentParser(
         usage=f'python3 {Path(__file__).name} [--file DATA] [--part N] [-v]'
               f'cat DATA | {Path(__file__).name} [--part 1] [-v]'
@@ -21,32 +22,32 @@ def parse_args():
     parser.add_argument('-v', '--verbose', action='store_true', help='Enable verbose output')
     return parser.parse_args()
 
-def part1(row):
+def part_1(row):
     return sum(row)
 
-def part2(row):
-    return sum(row)
+def part_2(row):
+    return sum(row) * 2
 
-def main(args):
+def main(file=None, part=None, verbose=False):
 
-    if args.file:
-        with open(args.file) as f:
+    if file:
+        with open(file, encoding='utf-8') as f:
             lines = f.readlines()
     else:
         lines = sys.stdin.readlines()
 
     rows = [np.fromstring(line, dtype=int, sep=' ') for line in lines]
 
-    if args.part == 1:
-        values = [part1(row) for row in rows]
-    elif args.part == 2:
-        values = [part2(row) for row in rows]
+    if part == 1:
+        values = [part_1(row) for row in rows]
+    elif part == 2:
+        values = [part_2(row) for row in rows]
     else:
-        raise ValueError(f'Invalid part number: {args.part}')
-    
+        raise ValueError(f'Invalid part number: {part}')
+
     total = sum(values)
 
-    if args.verbose:
+    if verbose:
         for i, value in enumerate(values):
             print(f'{rows[i]}: {value}')
 
@@ -58,5 +59,4 @@ def main(args):
 
 if __name__ == '__main__':
     args = parse_args()
-    main(args)
-
+    main(**vars(args))
