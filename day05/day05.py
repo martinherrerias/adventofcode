@@ -8,6 +8,7 @@ from pathlib import Path
 
 import numpy as np
 import re
+from graphlib import TopologicalSorter
 
 def parse_args():
     parser = argparse.ArgumentParser()
@@ -19,20 +20,49 @@ def parse_args():
     return parser.parse_args()
 
 
-def part_1(rules, sequence):
+def test_sequence(rules, sequence, fix = False):
 
+    # Remove irrelevant rules
     relevant = np.isin(rules[0], sequence) & np.isin(rules[1], sequence)
+    rules = [np.array(r)[relevant] for r in rules]
 
-    for j in np.where(relevant)[0]:
-        before, after = rules[0][j], rules[1][j]
+    # Check for inconsistencies
+    bad = False
+    for j, k in zip(rules[0], rules[1]):
+        if np.where(sequence == j)[0] > np.where(sequence == k)[0]:
+            bad = True
+            break
 
-        if np.where(sequence == before)[0] > np.where(sequence == after)[0]:
-            return 0
+    if bad and fix:
+        # Part 2: correct bad sequences
+        order = sorter(rules)
+        assert all(np.isin(sequence, order))
+        sequence = order
 
-    return sequence[len(sequence) // 2]
+    if (not bad and fix) or (bad and not fix):
+        return 0
+    else:
+        return sequence[len(sequence) // 2]
+
+
+def sorter(rules):
+
+    graph = {}
+    for j, k in zip(rules[0], rules[1]):
+        if k not in graph:
+            graph[k] = []
+        graph[k].append(j)
+
+    ts = TopologicalSorter(graph)
+    return list(ts.static_order())
+
+
+def part_1(rules, sequence):
+    return test_sequence(rules, sequence, fix = False)
 
 def part_2(rules, sequence):
-    return len(rules)
+    return test_sequence(rules, sequence, fix = True)
+
 
 def read_input(file):
     with open(file, encoding='utf-8') as f:
@@ -53,12 +83,13 @@ def read_input(file):
             assert seq.size % 2 == 1
             sequences.append(seq)
 
+    print(f'Read {len(rules)} rules and {len(sequences)} sequences')
+
     # transpose list of 2-tuples, into 2-list [before, after]
     rules = [np.array(x) for x in list(zip(*rules))]
 
-    print(f'Read {len(rules[0])} rules and {len(sequences)} sequences')
-
     return rules, sequences
+
 
 def main(file=None, part=None, verbose=False):
 
