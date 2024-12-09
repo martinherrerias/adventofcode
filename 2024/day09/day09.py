@@ -5,6 +5,8 @@ Advent of Code 2024 - https://adventofcode.com/2024/
 
 import argparse
 from pathlib import Path
+from dataclasses import dataclass
+from enum import Enum
 
 import numpy as np
 
@@ -60,19 +62,97 @@ def compact(unpacked):
 
 def checksum(compacted):
 
-    assert isinstance(compacted, list) and all([isinstance(x, int) for x in compacted])
-
     total = 0
     for i, n in enumerate(compacted):
+        if n == GAP:
+            continue
         total += i*n
     return total
+
+@dataclass
+class File:
+    idx: int
+    size: int
+    id: int
+
+@dataclass
+class Gap:
+    idx: int
+    size: int
+
+    def fill(self, file):
+        if self.size < file.size:
+            raise ValueError('Gap is too small')
+        
+        file.idx = self.idx
+        self.size -= file.size
+        self.idx += file.size
+
+def file_list(size, idx):
+    id = range(len(size))
+    return [File(i, s, x) for i, s, x in zip(idx, size, id) if s > 0]
+
+def gap_list(size, idx):
+    return [Gap(i, s) for i, s in zip(idx, size) if s > 0]
+
+def unpack_lists(row):
+
+    row = [int(c) for c in list(row)]
+    idx = [0] + list(np.cumsum(row[:-1]))
+
+    files = file_list(row[0::2], idx[0::2])
+    gaps = gap_list(row[1::2], idx[1::2])
+
+    return files, gaps
+
+
+class MoveResult(Enum):
+    OK = 0
+    NO_GAPS_LEFT = 1
+    NO_SPACE = 2
+
+def move_file(gaps, file):
+    gaps_left = [g for g in gaps if g.idx < file.idx]
+    if not gaps_left:
+        return MoveResult.NO_GAPS_LEFT
+    
+    gap = next((g for g in gaps_left if g.size >= file.size), None)
+    if gap is None:
+        return MoveResult.NO_SPACE
+    
+    gap.fill(file)
+    
+    return MoveResult.OK
+
+
+def repack(files, gaps):
+
+    last_file = max([f.idx + f.size for f in files])
+    compacted = [GAP] * last_file
+    for f in files:
+        compacted[f.idx:f.idx+f.size] = [f.id] * f.size
+    return compacted
+
+def compact_lists(files, gaps):
+
+    files.reverse()
+    for file in files:
+
+        result = move_file(gaps, file)
+        if result == MoveResult.NO_GAPS_LEFT:
+            break
+
+    files = sorted(files, key=lambda f: f.idx)
+    return files, gaps
+
 
 def part_1(row):
     return checksum(compact(unpack(row)))
 
 def part_2(row):
-    return 0
-
+    files, gaps = compact_lists(*unpack_lists(row))
+    compacted = repack(files, gaps)
+    return checksum(compacted)
 
 def main(file=None, part=None, verbose=False):
 
