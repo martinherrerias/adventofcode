@@ -2,8 +2,8 @@
 
 import os
 import pytest
-import numpy as np
-from day11 import part_1, part_2, main
+from numpy import nan
+from math import isnan
 
 here = os.path.dirname(os.path.realpath(__file__))
 test_data = os.path.join(here, 'day11.test.dat')
@@ -17,17 +17,37 @@ def test_shift_stone():
     assert shift_stone(99) == [9,9]
     assert shift_stone(999) == [2021976]
 
-def test_blink():
-    from day11 import blink
-    assert blink([0, 1, 10, 99, 999]) == [1, 2024, 1, 0, 9, 9, 2021976]
+def test_blinks_graph():
+    from day11 import blinks_graph
 
-    x = [125, 17]
-    for _ in range(6):
-        x = blink(x)
-    assert x == [2097446912, 14168, 4048, 2, 0, 2, 4, 40, 48, 2024, 40, 48, 80, 96, 2, 8, 6, 7, 6, 0, 3, 2]
+    assert blinks_graph([0,1,10], 1) == {0: [1], 1: [2024], 10: [1,0]}
+    assert blinks_graph([0,1,10], 2) == {0: [1], 1: [2024], 10: [1,0], 2024: [20,24]}
+
+def test_cleanup_graph():
+    from day11 import cleanup_graph
+
+    graph, node_map = cleanup_graph({0: [1], 1: [2024], 10: [1,0], 2024: [20,24]})
+    assert graph == {0: [1], 1: [3], 2: [1,0], 3: [4,4], 4: []}
+    assert node_map == {0: 0, 1: 1, 10: 2, 2024: 3, 20: 4, 24: 4}
+
+def test_count_paths():
+    from day11 import count_paths
+
+    graph = {0: [1], 1: [3], 2: [1,0], 3: [4,4], 4: []}
+
+    counts = count_paths(graph, 1) # == {0: 1, 1: 1, 2: 2, 3: 2, 4: nan}
+    assert [counts[j] for j in range(4)] == [1, 1, 2, 2]
+    assert isnan(counts[4])
+
+    counts = count_paths(graph, 2) # == {0: 1, 1: 2, 2: 2, 3: nan, 4: nan}
+    assert [counts[j] for j in range(3)] == [1, 2, 2]
+    assert all(isnan(counts[j]) for j in [3,4])
+
+def test_many_blinks():
+    from day11 import many_blinks
+
+    assert many_blinks([125, 17], 25) == 55312
 
 def test_main_1():
+    from day11 import main
     assert main(file=test_data, part=1) == 55312
-
-def test_main_2():
-    assert main(file=test_data, part=2) == 360
