@@ -14,13 +14,13 @@ def test_move_in_row():
     """
     from day15 import move_in_row
 
-    row = np.array(list('@O..#'))
+    row = np.array(list('@[]..#'))
     moved = move_in_row(row)
-    assert ''.join(row) == '.@O.#' and moved
+    assert ''.join(row) == '.@[].#' and moved
 
-    row = np.array(list('#..O@'))
+    row = np.array(list('#..[]@'))
     moved = move_in_row(row, reverse=True)
-    assert ''.join(row) == '#.O@.' and moved
+    assert ''.join(row) == '#.[]@.' and moved
 
     row = np.array(list('@OO#'))
     moved = move_in_row(row)
@@ -40,4 +40,5 @@ def test_main_1():
     assert main(file=test_data, part=1) == 10092
 
 def test_main_2():
-    assert main(file=test_data, part=2) == 360
+    from day15 import main
+    assert main(file=test_data, part=2) == 9021
