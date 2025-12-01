@@ -12,12 +12,14 @@ import numpy as np
 def parse_args():
     parser = argparse.ArgumentParser()
     parser.add_argument(
+        "-f",
         "--file",
         type=str,
         default=Path(__file__).with_suffix(".dat"),
         help="Input file, default: %(default)s",
     )
     parser.add_argument(
+        "-p",
         "--part",
         type=int,
         nargs="+",
