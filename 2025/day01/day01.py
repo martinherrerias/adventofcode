@@ -20,7 +20,13 @@ class Turn:
         self.clicks = int(line[1:])
 
     def apply(self, starting_value: int) -> int:
-        return (starting_value + self.direction * self.clicks) % 100
+        tmp = starting_value + self.direction * self.clicks
+        new_position = tmp % 100
+        if self.direction > 0 or starting_value == 0:
+            crossings = (self.clicks + starting_value) // 100
+        else:
+            crossings = (100 - starting_value + self.clicks) // 100
+        return new_position, crossings
 
 
 def parse_args():
@@ -44,33 +50,36 @@ def parse_args():
     return parser.parse_args()
 
 
-def part_1(lines: list[str]) -> int:
-    position = 50
-    counter = 0
-
-    for r in lines:
-        r = r.strip()
-        position = Turn(r).apply(position)
-        counter += position == 0
-    return counter
-
-
 def main(file=None, part=None, verbose=False):
 
     with open(file, encoding="utf-8") as f:
         lines = f.readlines()
 
     if verbose:
-        print(f'Read {len(lines)} from {file}')
+        print(f"Read {len(lines)} from {file}")
+
+    position = 50
+    zero_counter = 0
+    cross_counter = 0
+
+    for r in lines:
+        r = r.strip()
+        new_position, crossings = Turn(r).apply(position)
+        zero_counter += new_position == 0
+        cross_counter += crossings
+        if verbose:
+            print(
+                f"from: {position}, applied: {r}, new: {new_position}, "
+                f"crosssings: {crossings}"
+            )
+        position = new_position
 
     if part == 1:
-        result = part_1(lines)
+        return zero_counter
     elif part == 2:
-        raise NotImplementedError()
+        return cross_counter
     else:
         raise ValueError(f"Invalid part number: {part}")
-
-    return result
 
 
 if __name__ == "__main__":

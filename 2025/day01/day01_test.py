@@ -10,22 +10,25 @@ def test_turn():
     from day01 import Turn
     t = Turn('R42')
     assert t.direction == 1 and t.clicks == 42
-    assert t.apply(1) == 43
-    assert t.apply(99) == 41
+    assert t.apply(1) == (43, 0)
+    assert t.apply(99) == (41, 1)
 
     t = Turn('L10')
     assert t.direction == -1 and t.clicks == 10
-    assert t.apply(5) == 95
+    assert t.apply(5) == (95, 1)
 
-    assert Turn('R5').apply(95) == 0
+    assert Turn('R5').apply(95) == (0, 1)
 
+    assert Turn('R0').apply(0) == (0, 0)
+    assert Turn('L0').apply(0) == (0, 0)
+    assert Turn('R5').apply(0) == (5, 0)
+    assert Turn('L5').apply(0) == (95, 0)
+    assert Turn('R100').apply(0) == (0, 1)
+    assert Turn('L100').apply(0) == (0, 1)
 
-# def test_part_1():
-#     assert part_1(np.array([1, 2, 3])) == 6
-
-
-# def test_part_2():
-#     assert part_2(np.array([1, 2, 3])) == 12
+    assert Turn('R105').apply(95) == (0, 2)
+    assert Turn('L110').apply(5) == (95, 2)
+    assert Turn('R1000').apply(50) == (50, 10)
 
 
 def test_main_1():
@@ -33,5 +36,6 @@ def test_main_1():
     assert main(file=test_data, part=1) == 3
 
 
-# def test_main_2():
-#     assert main(file=test_data, part=2) == 360
+def test_main_2():
+    from day01 import main
+    assert main(file=test_data, part=2) == 6
