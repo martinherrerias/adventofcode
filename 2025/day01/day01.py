@@ -50,10 +50,8 @@ def part_1(lines: list[str]) -> int:
 
     for r in lines:
         r = r.strip()
-        newpos = Turn(r).apply(position)
-        counter += newpos == 0
-        print(f'From {position}, applied {r} to end at {newpos}')
-        position = newpos
+        position = Turn(r).apply(position)
+        counter += position == 0
     return counter
 
 
