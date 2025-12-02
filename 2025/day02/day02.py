@@ -43,7 +43,25 @@ def find_twin_numbers(id_range: str) -> list[int]:
         klo = max(10**(d-1), ceil(lo / b))
         khi = min(10**d-1, floor(hi / b))
         bad.extend([int(k * b) for k in range(klo, khi + 1)])
-    return bad
+    return set(bad)
+
+
+def find_rep_numbers(id_range: str) -> list[int]:
+    """
+    Find all numbers in a range that consist of one or more repeated digits
+    """
+    lo, hi = map(int, id_range.split('-'))
+    dlo, dhi = map(len, id_range.split('-'))
+
+    bad = []
+    for d in range(1, dhi//2 + 1):
+        for n in range(max(2, ceil(dlo / d)), dhi // d + 1):
+            b = 10**(d-1)
+            b = int(str(b) * n) / b  # e.g. 10.1010 for n=3, d=2
+            klo = max(10**(d-1), ceil(lo / b))
+            khi = min(10**d-1, floor(hi / b))
+            bad.extend([int(k * b) for k in range(klo, khi + 1)])
+    return set(bad)
 
 
 def main(file=None, part=None, verbose=False):
@@ -56,7 +74,7 @@ def main(file=None, part=None, verbose=False):
     if part == 1:
         return sum(map(lambda x: sum(find_twin_numbers(x)), ranges))
     elif part == 2:
-        raise NotImplementedError()
+        return sum(map(lambda x: sum(find_rep_numbers(x)), ranges))
     else:
         raise ValueError(f"Invalid part number: {part}")
 
