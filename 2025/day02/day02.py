@@ -34,19 +34,10 @@ def find_twin_numbers(id_range: str) -> list[int]:
     """
     Find all numbers in range that consist of a sequence repeated twice
     """
-    lo, hi = map(int, id_range.split('-'))
-    dlo, dhi = map(len, id_range.split('-'))
-
-    bad = []
-    for d in range(ceil(dlo/2), dhi//2 + 1):
-        b = 10**d + 1
-        klo = max(10**(d-1), ceil(lo / b))
-        khi = min(10**d-1, floor(hi / b))
-        bad.extend([int(k * b) for k in range(klo, khi + 1)])
-    return set(bad)
+    return find_rep_numbers(id_range, N=2)
 
 
-def find_rep_numbers(id_range: str) -> list[int]:
+def find_rep_numbers(id_range: str, N=None) -> list[int]:
     """
     Find all numbers in a range that consist of one or more repeated digits
     """
@@ -55,7 +46,11 @@ def find_rep_numbers(id_range: str) -> list[int]:
 
     bad = []
     for d in range(1, dhi//2 + 1):
-        for n in range(max(2, ceil(dlo / d)), dhi // d + 1):
+        if N is not None:
+            n_range = [N]
+        else:
+            n_range = range(max(2, ceil(dlo / d)), dhi // d + 1)
+        for n in n_range:
             b = 10**(d-1)
             b = int(str(b) * n) / b  # e.g. 10.1010 for n=3, d=2
             klo = max(10**(d-1), ceil(lo / b))
