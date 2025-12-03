@@ -30,24 +30,20 @@ def parse_args():
     return parser.parse_args()
 
 
-def max_joltage(nums):
+def max_joltage(nums, digits=2):
+
+    assert not any(n <= 0 for n in nums)
+
+    maxj = 0
+
     n = len(nums)
-    idx1 = np.argmax(nums)
-    if idx1 == n - 1:
-        newidx = np.argmax(nums[0:n-1])
-        if nums[newidx] > 0:
-            idx1 = newidx
-            idx2 = np.argmax(nums[newidx+1:]) + newidx + 1
-        else:
-            idx2 = idx1
-            idx1 = newidx
-    else:
-        idx2 = np.argmax(nums[idx1+1:]) + idx1 + 1
-    return 10*nums[idx1] + nums[idx2]
+    last_used = -1
+    for d in range(0, digits):
+        idx = np.argmax(nums[last_used + 1 : n - digits + d + 1]) + last_used + 1
+        last_used = idx
+        maxj = 10 * maxj + nums[idx]
 
-
-def part_2(row):
-    return sum(row) * 2
+    return maxj
 
 
 def main(file=None, part=None, verbose=False):
@@ -59,9 +55,9 @@ def main(file=None, part=None, verbose=False):
     rows = [list(map(int, list(line.strip()))) for line in lines if line.strip()]
 
     if part == 1:
-        values = [max_joltage(row) for row in rows]
+        values = [max_joltage(row, 2) for row in rows]
     elif part == 2:
-        raise NotImplementedError()
+        values = [max_joltage(row, 12) for row in rows]
     else:
         raise ValueError(f"Invalid part number: {part}")
 

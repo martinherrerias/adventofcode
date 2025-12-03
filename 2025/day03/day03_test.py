@@ -2,7 +2,6 @@
 
 import os
 # import pytest
-import numpy as np
 
 here = os.path.dirname(os.path.realpath(__file__))
 test_data = os.path.join(here, "day03.test.dat")
@@ -16,11 +15,6 @@ def test_max_joltage():
     assert max_joltage(list(map(int, list('818181911112111')))) == 92
 
 
-def test_part_2():
-    from day03 import part_2
-    assert part_2(np.array([1, 2, 3])) == 12
-
-
 def test_main_1():
     from day03 import main
     assert main(file=test_data, part=1) == 357
@@ -28,4 +22,4 @@ def test_main_1():
 
 def test_main_2():
     from day03 import main
-    assert main(file=test_data, part=2) == 360
+    assert main(file=test_data, part=2) == 3121910778619
