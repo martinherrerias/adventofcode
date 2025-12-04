@@ -30,8 +30,11 @@ def parse_args():
     return parser.parse_args()
 
 
-def part_1(data: np.array):
-    """Find the number of @ surrounded by less than 4 @"""
+def find_rolls(data: np.array, recursive=False):
+    """
+    Find the number of @ surrounded by less than 4 @
+    If recursive, remove them and repeat until no more can be removed.
+    """
 
     USED = '@'
     EMPTY = '.'
@@ -42,15 +45,22 @@ def part_1(data: np.array):
     data = data.reshape(-1)
 
     offsets = np.array([1, -1, ncols, -ncols, 1+ncols, 1-ncols, -1+ncols, -1-ncols])
-    starts = np.where(data == USED)[0].reshape(-1, 1)
 
-    valid = [sum(data[j + offsets] == USED) < 4 for j in starts]
+    counts = 0
+    while recursive or counts == 0:
+        starts = np.where(data == USED)[0].reshape(-1, 1)
 
-    return np.sum(valid)
+        valid = [sum(data[j + offsets] == USED) < 4 for j in starts]
+        data[starts[valid]] = EMPTY
 
+        removed = np.sum(valid)
+        print(f'Found and removed {removed} rolls')
+        counts += removed
 
-def part_2(data: np.array):
-    raise NotImplementedError()
+        if removed == 0:
+            break
+
+    return counts
 
 
 def main(file=None, part=None, verbose=False):
@@ -61,9 +71,9 @@ def main(file=None, part=None, verbose=False):
     data = np.array([list(line.strip()) for line in lines])
 
     if part == 1:
-        total = part_1(data)
+        total = find_rolls(data)
     elif part == 2:
-        total = part_2(data)
+        total = find_rolls(data, recursive=True)
     else:
         raise ValueError(f'Invalid part number: {part}')
 
