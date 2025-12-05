@@ -6,7 +6,19 @@ here = os.path.dirname(os.path.realpath(__file__))
 test_data = os.path.join(here, "day05.test.dat")
 
 
+def test_merge_ranges():
+    from day05 import merge_ranges
+
+    assert merge_ranges([(0, 1), (3, 4)]) == [(0, 1), (3, 4)]
+
+
 def test_main_1():
     from day05 import main
 
     assert main(file=test_data, part=1) == 3
+
+
+def test_main_2():
+    from day05 import main
+
+    assert main(file=test_data, part=2) == 14
