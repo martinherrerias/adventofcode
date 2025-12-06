@@ -1,6 +1,7 @@
 #! /usr/bin/env python3
 """
-Advent of Code 2025 - https://adventofcode.com/2025/
+Advent of Code YEAR, day DAY
+https://adventofcode.com/YEAR/day/DAY
 """
 
 import argparse
