@@ -40,3 +40,9 @@ sed -i "s/DAY/${day}/g" ${subdir}/${dayn}_test.py
 # Replace 'YEAR' with $year
 sed -i "s/YEAR/${year}/g" ${subdir}/${dayn}.py
 sed -i "s/YEAR/${year}/g" ${subdir}/${dayn}_test.py
+
+# Try to download input data
+if [ -f .session ]; then
+    URL=https://adventofcode.com/$year/day/$day/input
+    wget --header="Cookie: session=$(cat .session)" -O ${subdir}/${dayn}.dat $URL
+fi
