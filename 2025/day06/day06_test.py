@@ -11,6 +11,6 @@ def test_main_1():
     assert main(file=test_data, part=1) == 4277556
 
 
-# def test_main_2():
-#     from day06 import main
-#     assert main(file=test_data, part=2) == 360
+def test_main_2():
+    from day06 import main
+    assert main(file=test_data, part=2) == 3263827

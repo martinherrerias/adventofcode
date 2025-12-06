@@ -42,17 +42,19 @@ def main(file=None, part=None, verbose=False):
         lines = f.readlines()
 
     operations = re.split(r"\s+", lines.pop(-1).strip())
-    numbers = np.array(
-        [np.fromstring(line, dtype=int, sep=" ") for line in lines]
-    ).transpose()
 
     if part == 1:
-        values = [do_op(op, nm) for op, nm in zip(operations, numbers)]
+        numbers = np.array(
+            [np.fromstring(line, dtype=int, sep=" ") for line in lines]
+        ).transpose()
     elif part == 2:
-        raise NotImplementedError()
+        data = np.array([list(line.strip("\n")) for line in lines]).transpose()
+        blocks = re.split(r",\s+,", ",".join(["".join(x) for x in data]))
+        numbers = [np.fromstring(x, dtype=int, sep=",") for x in blocks]
     else:
         raise ValueError(f"Invalid part number: {part}")
 
+    values = [do_op(op, nm) for op, nm in zip(operations, numbers)]
     total = sum(values)
 
     if verbose:
