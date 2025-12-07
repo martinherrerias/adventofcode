@@ -40,32 +40,18 @@ def shift(x, n, **kwargs):
     return np.roll(np.pad(x, N, **kwargs), n)[N:-N]
 
 
-def count_splits(data: np.array):
-
-    has_beam = data[0] == START
-    split_count = 0
-    for row in data[1:]:
-        splits = np.logical_and(row == SPLITTER, has_beam)
-        split_count += sum(splits)
-
-        has_beam = np.logical_or(
-            np.logical_and(has_beam, np.logical_not(splits)),
-            np.logical_or(shift(splits, 1), shift(splits, -1)),
-        )
-
-    return split_count
-
-
 def count_particles(data: np.array):
 
+    split_count = 0
     particles = 1 * (data[0] == START)
     for row in data[1:]:
         splits = particles * (row == SPLITTER)
+        split_count += np.count_nonzero(splits)
         particles = (
             particles * np.logical_not(splits) + shift(splits, 1) + shift(splits, -1)
         )
 
-    return sum(particles)
+    return sum(particles), split_count
 
 
 def main(file=None, part=None, verbose=False):
@@ -76,14 +62,14 @@ def main(file=None, part=None, verbose=False):
     # Generic block-wise
     data = np.array([list(line.strip()) for line in lines])
 
+    paths, splits = count_particles(data)
+
     if part == 1:
-        total = count_splits(data)
+        return splits
     elif part == 2:
-        total = count_particles(data)
+        return paths
     else:
         raise ValueError(f"Invalid part number: {part}")
-
-    return total
 
 
 if __name__ == "__main__":
