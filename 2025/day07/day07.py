@@ -9,6 +9,10 @@ from pathlib import Path
 
 import numpy as np
 
+START = "S"
+# EMPTY = "."
+SPLITTER = "^"
+
 
 def parse_args():
     parser = argparse.ArgumentParser()
@@ -36,11 +40,7 @@ def shift(x, n, **kwargs):
     return np.roll(np.pad(x, N, **kwargs), n)[N:-N]
 
 
-def count_splits(data):
-
-    START = "S"
-    # EMPTY = "."
-    SPLITTER = "^"
+def count_splits(data: np.array):
 
     has_beam = data[0] == START
     split_count = 0
@@ -56,8 +56,16 @@ def count_splits(data):
     return split_count
 
 
-def part_2(data):
-    raise NotImplementedError()
+def count_particles(data: np.array):
+
+    particles = 1 * (data[0] == START)
+    for row in data[1:]:
+        splits = particles * (row == SPLITTER)
+        particles = (
+            particles * np.logical_not(splits) + shift(splits, 1) + shift(splits, -1)
+        )
+
+    return sum(particles)
 
 
 def main(file=None, part=None, verbose=False):
@@ -71,7 +79,7 @@ def main(file=None, part=None, verbose=False):
     if part == 1:
         total = count_splits(data)
     elif part == 2:
-        total = part_2(data)
+        total = count_particles(data)
     else:
         raise ValueError(f"Invalid part number: {part}")
 
