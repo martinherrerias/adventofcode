@@ -31,17 +31,23 @@ def parse_args():
     return parser.parse_args()
 
 
-def connect_n_shortest(rows: list[np.array], n: int = 1000) -> np.array:
+def connect_n_shortest(rows: list[np.array], n: int | None) -> np.array:
 
     triu = np.triu_indices(len(rows), 1)
     pairs = list(zip(triu[0], triu[1]))
     pairs.sort(key=lambda x: np.linalg.norm(rows[x[1]]-rows[x[0]]))
 
+    if n is None:
+        n = len(pairs)
+
     circuits = np.array(range(0, len(rows)))
     for (a, b) in pairs[0:n]:
         circuits[circuits == circuits[b]] = circuits[a]
 
-    return circuits
+        if all(circuits == circuits[a]):
+            break
+
+    return circuits, (a, b)
 
 
 def main(file=None, part=None, verbose=False, n=1000):
@@ -52,22 +58,23 @@ def main(file=None, part=None, verbose=False, n=1000):
     rows = [np.fromstring(line, dtype=int, sep=",") for line in lines]
 
     if part == 1:
-        circuits = connect_n_shortest(rows, n=n)
+        circuits, _ = connect_n_shortest(rows, n=n)
+
+        uniq = np.unique_counts(circuits)
+        if verbose:
+            print(f'{len(uniq.values)} circuits, with counts: {uniq.counts}\n')
+            for i, c in enumerate(circuits):
+                print(f"{rows[i]}: {c}")
+
+        largest = list(uniq.counts)
+        largest.sort(reverse=True)
+        total = np.prod(largest[0:3])
+
     elif part == 2:
-        raise NotImplementedError()
+        _, last_connected = connect_n_shortest(rows, n=None)
+        total = rows[last_connected[0]][0] * rows[last_connected[1]][0]
     else:
         raise ValueError(f"Invalid part number: {part}")
-
-    uniq = np.unique_counts(circuits)
-
-    if verbose:
-        print(f'{len(uniq.values)} circuits, with counts: {uniq.counts}\n')
-        for i, c in enumerate(circuits):
-            print(f"{rows[i]}: {c}")
-
-    largest = list(uniq.counts)
-    largest.sort(reverse=True)
-    total = np.prod(largest[0:3])
 
     return total
 
