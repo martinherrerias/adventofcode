@@ -9,7 +9,7 @@ last_year=$(find . -type d -name '20*' | sort | tail -n 1 | cut -c3-)
 last_day=$(ls ${last_year} | grep '^day' | sort | tail -n 1 | cut -c4-)
 
 year=${1:-$last_year}
-day=${2:-$((${last_day}+1))}
+day=${2:-$((10#${last_day}+1))}
 
 if [ $year -lt 2015]; then
     echo "Bad year: $year"
