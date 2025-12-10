@@ -9,6 +9,7 @@ import argparse
 from pathlib import Path
 
 import numpy as np
+from scipy.optimize import LinearConstraint, milp
 
 
 def parse_args():
@@ -34,7 +35,12 @@ def parse_args():
 
 def part_1(line):
     wiring_matrix, light_diagram, _ = parse_line(line)
-    return min_switches(wiring_matrix, light_diagram)
+    return match_lights(wiring_matrix, light_diagram)
+
+
+def part_2(line):
+    wiring_matrix, _, joltage = parse_line(line)
+    return match_joltage(wiring_matrix, joltage)
 
 
 def parse_line(line: str):
@@ -53,10 +59,9 @@ def parse_line(line: str):
     return wiring_matrix, light_diagram, joltage
 
 
-def min_switches(wiring_matrix, light_diagram, _state=tuple()):
+def match_lights(wiring_matrix, light_diagram):
 
-    if len(_state) == len(light_diagram):
-        pass
+    assert wiring_matrix.shape[0] == len(light_diagram)
 
     # we can flip them off the same as we flipped them on
     need_switching = light_diagram
@@ -71,11 +76,11 @@ def min_switches(wiring_matrix, light_diagram, _state=tuple()):
             return np.nan
 
         # steps without flipping first switch
-        without_first_switch = min_switches(wiring_matrix[:, 1:], light_diagram, _state + (0,))
+        without_first_switch = match_lights(wiring_matrix[:, 1:], light_diagram)
 
         # steps if flipping first switch
         new_state = np.bitwise_xor(wiring_matrix[:, 0], light_diagram)
-        with_first_switch = 1 + min_switches(wiring_matrix[:, 1:], new_state, _state + (1,))
+        with_first_switch = 1 + match_lights(wiring_matrix[:, 1:], new_state)
 
         return np.nanmin([without_first_switch, with_first_switch])
 
@@ -83,6 +88,20 @@ def min_switches(wiring_matrix, light_diagram, _state=tuple()):
         return 1
     else:
         return np.nan
+
+
+def match_joltage(wiring_matrix, joltage):
+
+    assert wiring_matrix.shape[0] == len(joltage)
+
+    c = np.ones(wiring_matrix.shape[1])
+    constraints = LinearConstraint(wiring_matrix, joltage, joltage)
+    integrality = np.ones_like(c) * 3
+
+    res = milp(c, integrality=integrality, constraints=constraints)
+    assert res.status == 0
+
+    return sum(res.x)
 
 
 def main(file=None, part=None, verbose=False):
@@ -93,7 +112,7 @@ def main(file=None, part=None, verbose=False):
     if part == 1:
         values = [part_1(line) for line in lines if line.strip()]
     elif part == 2:
-        NotImplementedError()
+        values = [part_2(line) for line in lines if line.strip()]
     else:
         raise ValueError(f"Invalid part number: {part}")
 
