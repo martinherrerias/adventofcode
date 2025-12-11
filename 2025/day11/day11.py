@@ -6,7 +6,6 @@ https://adventofcode.com/2025/day/11
 
 import argparse
 from pathlib import Path
-
 from graphlib import TopologicalSorter
 
 
@@ -31,17 +30,31 @@ def parse_args():
     return parser.parse_args()
 
 
-def count_paths(graph, start, end):
+def count_paths(graph, start, end, through=None):
     """
     Calculate the number of paths from start to end
     """
 
-    node_order = list(TopologicalSorter(graph).static_order())
-    node_order.reverse()
+    nodes = list(TopologicalSorter(graph).static_order())
+    nodes.reverse()
 
-    ways = {k: 0 for k in node_order}
+    start_idx = nodes.index(start)
+    end_idx = nodes.index(end)
+
+    if through:
+        through_idx = [nodes.index(t) for t in through]
+        through_idx.sort()
+        assert all(t > start_idx and t < end_idx for t in through_idx)
+
+        first_stop = nodes[through_idx[0]]
+        remaining_stops = [nodes[j] for j in through_idx[1:]]
+
+        return count_paths(graph, start, first_stop) * \
+            count_paths(graph, first_stop, end, remaining_stops)
+
+    ways = {k: 0 for k in nodes}
     ways[start] = 1
-    for node in node_order[node_order.index(start):node_order.index(end) + 1]:
+    for node in nodes[start_idx:end_idx + 1]:
         for neighbor in graph.get(node, []):
             ways[neighbor] += ways[node]
 
@@ -69,7 +82,7 @@ def main(file=None, part=None, verbose=False):
     if part == 1:
         total = count_paths(graph, 'you', 'out')
     elif part == 2:
-        raise NotImplementedError()
+        total = count_paths(graph, 'svr', 'out', ['dac', 'fft'])
     else:
         raise ValueError(f"Invalid part number: {part}")
 
